@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:camel="http://camel.apache.org/schema/spring"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+                           http://www.springframework.org/schema/beans/spring-beans.xsd
+                           http://camel.apache.org/schema/spring
+                           http://camel.apache.org/schema/spring/camel-spring.xsd
+                           http://www.springframework.org/schema/context
+                           http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <!-- Enable component scanning -->
+    <context:component-scan base-package="com.sample.apache"/>
+
+    <!-- Define the Camel context -->
+    <camel:camelContext id="camelContext">
+        <camel:route id="logMessageRoute">
+            <camel:from uri="servlet://log/message"/>
+            <camel:log message="Hello World" />
+            <camel:setBody>
+                <camel:simple>Hello World</camel:simple>
+            </camel:setBody>
+            <camel:to uri="file://{{file.output.dir}}" />
+        </camel:route>
+    </camel:camelContext>
+
+    <!-- Define the servlet bean -->
+    <bean id="servlet" class="org.apache.camel.component.servlet.CamelHttpTransportServlet"/>
+
+    <!-- Register the servlet -->
+    <bean class="org.springframework.boot.web.servlet.ServletRegistrationBean">
+        <property name="servlet" ref="servlet"/>
+        <property name="urlMappings">
+            <list>
+                <value>/api/*</value>
+            </list>
+        </property>
+    </bean>
+
+</beans>
